@@ -19,6 +19,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import bookmarksstorage.dao.BookmarkDao;
 import bookmarksstorage.dao.Dao;
@@ -76,7 +78,14 @@ public class MainWindow extends JFrame {
 		for (Bookmark b : dao.getAll()) {
 			listModel.addElement(b.getName());
 		}
-		JList<String> bookmarkList = new JList<>(listModel);
+		final JList<String> bookmarkList = new JList<>(listModel);
+		bookmarkList.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				System.out.println(bookmarkList.getSelectedIndex() + " " + bookmarkList.getSelectedValue());								
+			}
+		});
 
 		JComboBox<String> cat = new JComboBox<String>(categories);
 		listPanel.add(cat, BorderLayout.NORTH);
@@ -118,7 +127,6 @@ public class MainWindow extends JFrame {
 		gradeP.add(lGrade);
 		gradeP.add(tGrade);
 
-		
 		// buttons
 		JPanel buttonP = new JPanel();
 		btnSave = new JButton("Save");
@@ -128,7 +136,7 @@ public class MainWindow extends JFrame {
 				System.out.println(dao.get(0));
 			}
 		});
-		
+
 		btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener() {
 			@Override
@@ -136,7 +144,7 @@ public class MainWindow extends JFrame {
 				System.out.println(dao.get(0));
 			}
 		});
-		
+
 		btnDelete = new JButton("Delete");
 		btnDelete.addActionListener(new ActionListener() {
 			@Override
@@ -144,20 +152,19 @@ public class MainWindow extends JFrame {
 				System.out.println(dao.get(0));
 			}
 		});
-		
+
 		btnNew = new JButton("New");
 		btnNew.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println(dao.get(0));
 			}
-		});		
-		
+		});
+
 		buttonP.add(btnSave);
 		buttonP.add(btnCancel);
 		buttonP.add(btnDelete);
 		buttonP.add(btnNew);
-		
 
 		bookmarkProperties.add(nameP);
 		bookmarkProperties.add(descP);
