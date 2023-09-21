@@ -7,6 +7,7 @@ import java.util.Optional;
 import bookmarksstorage.model.Bookmark;
 
 public class BookmarkDao implements Dao<Bookmark>{
+		
 	private List<Bookmark> bookmarks; 
 
 	public BookmarkDao() {
@@ -41,6 +42,16 @@ public class BookmarkDao implements Dao<Bookmark>{
 	@Override
 	public void delete(Bookmark t) {
 		bookmarks.remove(t);
+	}
+
+	@Override
+	public void connectDefaultDB(String string) {
+		try {
+			bookmarks = SQLiteHandler.connectToDB(string);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	

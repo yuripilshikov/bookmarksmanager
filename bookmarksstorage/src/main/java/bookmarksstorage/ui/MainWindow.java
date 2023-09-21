@@ -5,11 +5,13 @@ import java.awt.GridLayout;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -33,7 +35,14 @@ public class MainWindow extends JFrame {
 	BookmarkDao dao;
 
 	JButton btnSave, btnCancel, btnDelete, btnNew;
-
+	
+	JTextArea tName, tDesc, tUrl, tGrade;
+	
+	DefaultListModel<Bookmark> listModel;
+	JList<Bookmark> bookmarkList;
+	
+	File database;
+	
 	// temporary
 	private final String[] categories = { "Blender", "Java", "Krita" };
 
@@ -46,6 +55,7 @@ public class MainWindow extends JFrame {
 		// frame related
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(640, 480);
+		this.setLocationRelativeTo(null);
 
 		populateWindow();
 		createMainMenu();
@@ -60,12 +70,28 @@ public class MainWindow extends JFrame {
 		ob.add(ob1);
 		ob.add(ob2);
 		JMenuItem m11 = new JMenuItem("Connect to database...");
-		JMenuItem m12 = new JMenuItem("New database");
-		JMenuItem m13 = new JMenuItem("New dummy database");
+		m11.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+				int result = fileChooser.showOpenDialog(getParent());
+				if (result == JFileChooser.APPROVE_OPTION) {
+					database = fileChooser.getSelectedFile();
+		        }
+			}
+		});
+		JMenuItem m12 = new JMenuItem("New default database");
+		m12.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dao.connectDefaultDB("sample.db");
+				refreshList();
+			}
+		});		
 		JMenuItem m22 = new JMenuItem("Quit");
 		ob1.add(m11);
-		ob1.add(m12);
-		ob1.add(m13);
+		ob1.add(m12);		
 		ob1.add(m22);
 		this.setJMenuBar(ob);
 	}
@@ -74,16 +100,25 @@ public class MainWindow extends JFrame {
 
 		JPanel listPanel = new JPanel();
 		listPanel.setLayout(new BorderLayout());
-		DefaultListModel<String> listModel = new DefaultListModel<>();
+		listModel = new DefaultListModel<>();
 		for (Bookmark b : dao.getAll()) {
-			listModel.addElement(b.getName());
+			listModel.addElement(b);
 		}
-		final JList<String> bookmarkList = new JList<>(listModel);
+		bookmarkList = new JList<>(listModel);
 		bookmarkList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				System.out.println(bookmarkList.getSelectedIndex() + " " + bookmarkList.getSelectedValue());								
+				Bookmark b = bookmarkList.getSelectedValue();							
+				try {
+					tName.setText(b.getName());
+					tDesc.setText(b.getDescription());
+					tUrl.setText(b.getLink());
+					tGrade.setText("" + b.getGrade());
+				} catch(Exception exx) {
+					
+				}
+				
 			}
 		});
 
@@ -99,16 +134,16 @@ public class MainWindow extends JFrame {
 		JLabel lUrl = new JLabel("Link");
 		JLabel lGrade = new JLabel("Grade");
 
-		JTextArea tName = new JTextArea();
+		tName = new JTextArea();
 		tName.setColumns(20);
-		JTextArea tDesc = new JTextArea();
+		tDesc = new JTextArea();
 		tDesc.setColumns(20);
 		tDesc.setLineWrap(true);
 		tDesc.setRows(5);
 
-		JTextArea tUrl = new JTextArea();
+		tUrl = new JTextArea();
 		tUrl.setColumns(20);
-		JTextArea tGrade = new JTextArea();
+		tGrade = new JTextArea();
 		tGrade.setColumns(20);
 
 		JPanel nameP = new JPanel();
@@ -138,10 +173,10 @@ public class MainWindow extends JFrame {
 		});
 
 		btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener() {
+		btnCancel.addActionListener(new ActionListener() { // refresh
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(dao.get(0));
+				refreshList();
 			}
 		});
 
@@ -149,7 +184,10 @@ public class MainWindow extends JFrame {
 		btnDelete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(dao.get(0));
+				// not working...
+//				listModel.removeElement(bookmarkList.getSelectedValue());
+//				dao.delete(bookmarkList.getSelectedValue());				
+//				bookmarkList.ensureIndexIsVisible(listModel.getSize());
 			}
 		});
 
@@ -157,7 +195,11 @@ public class MainWindow extends JFrame {
 		btnNew.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(dao.get(0));
+				Bookmark b = new Bookmark(99, tName.getText(), tDesc.getText(), tUrl.getText(), Integer.parseInt(tGrade.getText()), "test"); // TODO remove magic number
+				dao.save(b);
+				listModel.addElement(b);
+				bookmarkList.ensureIndexIsVisible(listModel.getSize());
+				
 			}
 		});
 
@@ -176,6 +218,14 @@ public class MainWindow extends JFrame {
 
 		add(jsp);
 
+	}
+	
+	private void refreshList() {
+		listModel.clear();
+		for (Bookmark b : dao.getAll()) {
+			listModel.addElement(b);
+		}
+		bookmarkList.ensureIndexIsVisible(listModel.getSize());
 	}
 
 }

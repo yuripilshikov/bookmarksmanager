@@ -64,8 +64,9 @@ public class Bookmark {
 
 	@Override
 	public String toString() {
-		return "Bookmark [id=" + id + ", name=" + name + ", description=" + description + ", link=" + link + ", grade="
-				+ grade + ", category=" + category + "]";
+//		return "Bookmark [id=" + id + ", name=" + name + ", description=" + description + ", link=" + link + ", grade="
+//				+ grade + ", category=" + category + "]";
+		return id + " " + name;
 	}
 	
 	
