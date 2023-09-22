@@ -31,16 +31,11 @@ import bookmarksstorage.model.Bookmark;
 public class MainWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-
 	BookmarkDao dao;
-
-	JButton btnSave, btnCancel, btnDelete, btnNew;
-	
-	JTextArea tName, tDesc, tUrl, tGrade;
-	
+	JButton btnSave, btnCancel, btnDelete, btnNew;	
+	JTextArea tName, tDesc, tUrl, tGrade;	
 	DefaultListModel<Bookmark> listModel;
-	JList<Bookmark> bookmarkList;
-	
+	JList<Bookmark> bookmarkList;	
 	File database;
 	
 	// temporary
@@ -117,8 +112,7 @@ public class MainWindow extends JFrame {
 					tGrade.setText("" + b.getGrade());
 				} catch(Exception exx) {
 					
-				}
-				
+				}				
 			}
 		});
 

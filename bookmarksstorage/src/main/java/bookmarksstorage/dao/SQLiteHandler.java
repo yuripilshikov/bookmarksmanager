@@ -22,10 +22,14 @@ public class SQLiteHandler {
 			statement.setQueryTimeout(30);
 			
 			statement.executeUpdate("drop table if exists bookmark");
+			statement.executeUpdate("drop table if exists categories");
 		      statement.executeUpdate("create table bookmark (id integer primary key autoincrement, name string, description string, link string, grade integer, category string)");
 		      statement.executeUpdate("insert into bookmark(name, description, link, grade, category) values('b1', 'lorem ipsum', 'ww.www.wwww', 1, 'Blender')");
 		      statement.executeUpdate("insert into bookmark(name, description, link, grade, category) values('c1', 'loremfdsfsadfsadfsdaf', 'ww.www.wsdfw', 2, 'Blender')");
 		      statement.executeUpdate("insert into bookmark(name, description, link, grade, category) values('d1', 'lorem sdfsafsdfsdf', 'ww.www.sdfsfsdf', 3, 'Krita')");
+		      statement.executeUpdate("create table categories (id integer primary key autoincrement, name string)");
+		      statement.executeUpdate("insert into categories(name) values('blender')");
+		      statement.executeUpdate("insert into categories(name) values('krita')");
 		      ResultSet rs = statement.executeQuery("select * from bookmark");
 		      while(rs.next())
 		      {
@@ -51,7 +55,10 @@ public class SQLiteHandler {
 	
 	
 	
-	public void performRequest(String request) {
+	public static void performRequest(String request) throws ClassNotFoundException {
+		Class.forName("org.sqlite.JDBC");
+		List<Bookmark> list = new ArrayList<>();
+		Connection connection = null;
 		
 	}
 }
