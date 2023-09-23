@@ -7,14 +7,13 @@ public interface Dao<T> {
 	
 	Optional<T> get(long id);
     
-    List<T> getAll();
+    List<T> getAll() throws ClassNotFoundException;
     
-    void save(T t);
+    void save(T t) throws ClassNotFoundException;
     
     void update(T t, String[] params);
     
     void delete(T t);
     
-    void connectDefaultDB(String string);
-
+    void createDB(String string) throws ClassNotFoundException;
 }

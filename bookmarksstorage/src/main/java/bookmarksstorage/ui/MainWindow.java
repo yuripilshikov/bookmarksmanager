@@ -6,6 +6,7 @@ import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -37,21 +38,27 @@ public class MainWindow extends JFrame {
 	DefaultListModel<Bookmark> listModel;
 	JList<Bookmark> bookmarkList;	
 	File database;
-	
-	// temporary
-	private final String[] categories = { "Blender", "Java", "Krita" };
+	String[] categories;
 
 	public MainWindow() {
 		super("Bookmark database");
 
 		// logic part
 		dao = new BookmarkDao();
+		
 
 		// frame related
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(640, 480);
 		this.setLocationRelativeTo(null);
 
+		try {
+			categories = dao.getCategories();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		populateWindow();
 		createMainMenu();
 
@@ -80,7 +87,8 @@ public class MainWindow extends JFrame {
 		m12.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dao.connectDefaultDB("sample.db");
+
+				//dao.connectDefaultDB("sample.db");
 				refreshList();
 			}
 		});		
@@ -96,8 +104,13 @@ public class MainWindow extends JFrame {
 		JPanel listPanel = new JPanel();
 		listPanel.setLayout(new BorderLayout());
 		listModel = new DefaultListModel<>();
-		for (Bookmark b : dao.getAll()) {
-			listModel.addElement(b);
+		try {
+			for (Bookmark b : dao.getAll()) {
+				listModel.addElement(b);
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		bookmarkList = new JList<>(listModel);
 		bookmarkList.addListSelectionListener(new ListSelectionListener() {
@@ -190,7 +203,12 @@ public class MainWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Bookmark b = new Bookmark(99, tName.getText(), tDesc.getText(), tUrl.getText(), Integer.parseInt(tGrade.getText()), "test"); // TODO remove magic number
-				dao.save(b);
+				try {
+					dao.save(b);
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				listModel.addElement(b);
 				bookmarkList.ensureIndexIsVisible(listModel.getSize());
 				
@@ -216,9 +234,9 @@ public class MainWindow extends JFrame {
 	
 	private void refreshList() {
 		listModel.clear();
-		for (Bookmark b : dao.getAll()) {
-			listModel.addElement(b);
-		}
+//		for (Bookmark b : dao.getAll()) {
+//			listModel.addElement(b);
+//		}
 		bookmarkList.ensureIndexIsVisible(listModel.getSize());
 	}
 
