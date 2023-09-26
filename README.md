@@ -1,2 +1,3 @@
-# portablewiki
-Portable notes storage
+# Bookmarks manager
+
+SQLite bookmarks manager
