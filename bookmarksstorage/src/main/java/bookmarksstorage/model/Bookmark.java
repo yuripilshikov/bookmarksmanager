@@ -6,16 +6,15 @@ public class Bookmark {
 	private String description;
 	private String link;
 	private int grade;
-	private String category;
 	
-	public Bookmark(int id, String name, String description, String link, int grade, String category) {
+	
+	public Bookmark(int id, String name, String description, String link, int grade) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.link = link;
 		this.grade = grade;
-		this.category = category;
 	}
 
 	public int getId() {
@@ -54,18 +53,9 @@ public class Bookmark {
 		this.grade = grade;
 	}
 
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
 
 	@Override
 	public String toString() {
-//		return "Bookmark [id=" + id + ", name=" + name + ", description=" + description + ", link=" + link + ", grade="
-//				+ grade + ", category=" + category + "]";
 		return id + " " + name;
 	}
 	

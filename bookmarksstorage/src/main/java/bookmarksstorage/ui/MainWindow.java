@@ -1,12 +1,9 @@
 package bookmarksstorage.ui;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -26,42 +23,30 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import bookmarksstorage.dao.BookmarkDao;
-import bookmarksstorage.dao.Dao;
 import bookmarksstorage.model.Bookmark;
 
 public class MainWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	BookmarkDao dao;
-	JButton btnSave, btnCancel, btnDelete, btnNew;	
-	JTextArea tName, tDesc, tUrl, tGrade;	
+	JButton btnSave, btnCancel, btnDelete, btnNew;
+	JTextArea tName, tDesc, tUrl, tGrade;
 	DefaultListModel<Bookmark> listModel;
-	JList<Bookmark> bookmarkList;	
+	JList<Bookmark> bookmarkList;
 	File database;
 	String[] categories;
+	String selectedCategory;
 
 	public MainWindow() {
 		super("Bookmark database");
 
-		// logic part
 		dao = new BookmarkDao();
-		
 
-		// frame related
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(640, 480);
 		this.setLocationRelativeTo(null);
 
-		try {
-			categories = dao.getCategories();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		populateWindow();
 		createMainMenu();
-
 		this.setVisible(true);
 	}
 
@@ -72,7 +57,7 @@ public class MainWindow extends JFrame {
 		ob.add(ob1);
 		ob.add(ob2);
 		JMenuItem m11 = new JMenuItem("Connect to database...");
-		m11.addActionListener(new ActionListener() {			
+		m11.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -80,58 +65,72 @@ public class MainWindow extends JFrame {
 				int result = fileChooser.showOpenDialog(getParent());
 				if (result == JFileChooser.APPROVE_OPTION) {
 					database = fileChooser.getSelectedFile();
-		        }
+					dao.setURI(database.getName());
+					System.out.println(database.getAbsolutePath());
+					try {
+						dao.refreshCategories();
+						populateWindow();
+					} catch (ClassNotFoundException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 		JMenuItem m12 = new JMenuItem("New default database");
-		m12.addActionListener(new ActionListener() {			
+		m12.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				try {
+					dao.createDB("test.db");
+					dao.refreshCategories();
 
-				//dao.connectDefaultDB("sample.db");
+				} catch (ClassNotFoundException e1) {
+					e1.printStackTrace();
+				}
+				categories = dao.getCategories();
+				populateWindow();
 				refreshList();
 			}
-		});		
+		});
 		JMenuItem m22 = new JMenuItem("Quit");
 		ob1.add(m11);
-		ob1.add(m12);		
+		ob1.add(m12);
 		ob1.add(m22);
 		this.setJMenuBar(ob);
 	}
 
 	private void populateWindow() {
-
 		JPanel listPanel = new JPanel();
+
 		listPanel.setLayout(new BorderLayout());
 		listModel = new DefaultListModel<>();
-		try {
-			for (Bookmark b : dao.getAll()) {
-				listModel.addElement(b);
-			}
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		JComboBox<String> cat = new JComboBox<String>(categories);
+		selectedCategory = cat.getSelectedItem().toString();
+
+		listPanel.add(cat, BorderLayout.NORTH);
+
+		for (Bookmark b : dao.getBookmarksByCategory(selectedCategory)) {
+			listModel.addElement(b);
 		}
 		bookmarkList = new JList<>(listModel);
 		bookmarkList.addListSelectionListener(new ListSelectionListener() {
-
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				Bookmark b = bookmarkList.getSelectedValue();							
+				Bookmark b = bookmarkList.getSelectedValue();
 				try {
 					tName.setText(b.getName());
 					tDesc.setText(b.getDescription());
 					tUrl.setText(b.getLink());
 					tGrade.setText("" + b.getGrade());
-				} catch(Exception exx) {
-					
-				}				
+				} catch (Exception exx) {
+					exx.printStackTrace();
+				}
 			}
 		});
 
-		JComboBox<String> cat = new JComboBox<String>(categories);
-		listPanel.add(cat, BorderLayout.NORTH);
 		listPanel.add(bookmarkList, BorderLayout.CENTER);
+		
 
 		JPanel bookmarkProperties = new JPanel();
 		bookmarkProperties.setLayout(new BoxLayout(bookmarkProperties, BoxLayout.Y_AXIS));
@@ -198,20 +197,21 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		btnNew = new JButton("New");
+		btnNew = new JButton("Create new");
 		btnNew.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Bookmark b = new Bookmark(99, tName.getText(), tDesc.getText(), tUrl.getText(), Integer.parseInt(tGrade.getText()), "test"); // TODO remove magic number
-				try {
-					dao.save(b);
-				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				listModel.addElement(b);
-				bookmarkList.ensureIndexIsVisible(listModel.getSize());
-				
+//				Bookmark b = new Bookmark(99, tName.getText(), tDesc.getText(), tUrl.getText(),
+//						Integer.parseInt(tGrade.getText())); // TODO remove magic number
+//				try {
+//					dao.save(b);
+//				} catch (ClassNotFoundException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//				listModel.addElement(b);
+//				bookmarkList.ensureIndexIsVisible(listModel.getSize());
+
 			}
 		});
 
@@ -228,10 +228,10 @@ public class MainWindow extends JFrame {
 
 		JSplitPane jsp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, bookmarkProperties);
 
-		add(jsp);
+		this.add(jsp);
 
 	}
-	
+
 	private void refreshList() {
 		listModel.clear();
 //		for (Bookmark b : dao.getAll()) {
